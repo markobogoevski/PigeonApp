@@ -3,11 +3,15 @@ const countLabel = document.querySelector("#scene-count");
 const refreshButton = document.querySelector("#refresh-scene");
 const template = document.querySelector("#pigeon-template");
 const backgroundMusic = document.querySelector("#background-music");
+const jokeSound = document.querySelector("#joke-sound");
+const kissSound = document.querySelector("#kiss-sound");
 
-let audioContext;
 let activeKissTimer;
 let currentVersion;
 let musicStarted = false;
+
+if (jokeSound) jokeSound.volume = 0.95;
+if (kissSound) kissSound.volume = 1;
 
 function assetFor(kind) {
   return "/static/assets/pigeon-cutout.png";
@@ -16,7 +20,7 @@ function assetFor(kind) {
 function startBackgroundMusic() {
   if (!backgroundMusic || musicStarted) return;
 
-  backgroundMusic.volume = 0.24;
+  backgroundMusic.volume = 0.16;
   backgroundMusic.playbackRate = 1;
   backgroundMusic
     .play()
@@ -28,83 +32,12 @@ function startBackgroundMusic() {
     });
 }
 
-function getAudioContext() {
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtx) return null;
+function playLocalSound(sound) {
+  if (!sound) return;
 
-  audioContext ||= new AudioCtx();
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-
-  return audioContext;
-}
-
-function playGoofyJokeSound() {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-
-  const now = ctx.currentTime;
-  const master = ctx.createGain();
-  master.gain.setValueAtTime(0.0001, now);
-  master.gain.exponentialRampToValueAtTime(0.2, now + 0.018);
-  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
-  master.connect(ctx.destination);
-
-  [
-    { start: 0, from: 290, to: 840, type: "square", gain: 0.5 },
-    { start: 0.1, from: 720, to: 360, type: "triangle", gain: 0.32 },
-    { start: 0.2, from: 460, to: 920, type: "sine", gain: 0.2 },
-  ].forEach((part) => {
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const start = now + part.start;
-    oscillator.type = part.type;
-    oscillator.frequency.setValueAtTime(part.from, start);
-    oscillator.frequency.exponentialRampToValueAtTime(part.to, start + 0.16);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(part.gain, start + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
-    oscillator.connect(gain);
-    gain.connect(master);
-    oscillator.start(start);
-    oscillator.stop(start + 0.2);
-  });
-}
-
-function playKissSound() {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-
-  const now = ctx.currentTime;
-  const pop = ctx.createOscillator();
-  const sparkle = ctx.createOscillator();
-  const popGain = ctx.createGain();
-  const sparkleGain = ctx.createGain();
-
-  pop.type = "sine";
-  pop.frequency.setValueAtTime(260, now);
-  pop.frequency.exponentialRampToValueAtTime(920, now + 0.09);
-  pop.frequency.exponentialRampToValueAtTime(340, now + 0.2);
-  popGain.gain.setValueAtTime(0.0001, now);
-  popGain.gain.exponentialRampToValueAtTime(0.24, now + 0.018);
-  popGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
-
-  sparkle.type = "triangle";
-  sparkle.frequency.setValueAtTime(1040, now + 0.08);
-  sparkle.frequency.exponentialRampToValueAtTime(1540, now + 0.22);
-  sparkleGain.gain.setValueAtTime(0.0001, now + 0.08);
-  sparkleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.11);
-  sparkleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
-
-  pop.connect(popGain);
-  sparkle.connect(sparkleGain);
-  popGain.connect(ctx.destination);
-  sparkleGain.connect(ctx.destination);
-  pop.start(now);
-  sparkle.start(now + 0.08);
-  pop.stop(now + 0.28);
-  sparkle.stop(now + 0.36);
+  const effect = new Audio(sound.currentSrc || sound.src);
+  effect.volume = sound.volume;
+  effect.play().catch(() => {});
 }
 
 function tellJoke(pigeon) {
@@ -116,7 +49,7 @@ function tellJoke(pigeon) {
   const bubble = pigeon.querySelector(".bubble");
   bubble.textContent = pigeon.dataset.joke || "Coo. The joke flew away.";
   pigeon.classList.add("talking");
-  playGoofyJokeSound();
+  playLocalSound(jokeSound);
 }
 
 function setKissMotion(left, right) {
@@ -181,7 +114,7 @@ function handlePigeonClick(pigeon) {
     node.classList.add("kissing-now");
   });
 
-  playKissSound();
+  playLocalSound(kissSound);
   clearTimeout(activeKissTimer);
   activeKissTimer = setTimeout(() => {
     pair.forEach((node) => {

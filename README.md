@@ -54,3 +54,5 @@ The GitHub Actions workflow at `.github/workflows/windows-installer.yml` can als
 ## Audio
 
 - `static/assets/medieval-pigeon-loop.wav`: Local generated 24-second medieval-style loop. Browsers start it after the first user interaction because audible autoplay is blocked by default.
+- `static/assets/goofy-pigeon-click.wav`: Local generated click sound for joke pigeons.
+- `static/assets/pigeon-kiss-pop.wav`: Local generated kiss sound for the hidden love pair.
