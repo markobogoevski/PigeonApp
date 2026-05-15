@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pigeon Joke Square</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <audio
+      id="background-music"
+      src="/static/assets/medieval-pigeon-loop.wav"
+      preload="auto"
+      loop
+    ></audio>
+
+    <main class="square" aria-label="Animated pigeon joke square">
+      <section id="stage" class="stage" aria-live="polite">
+        <div class="sun" aria-hidden="true"></div>
+        <div class="cloud cloud-one" aria-hidden="true"></div>
+        <div class="cloud cloud-two" aria-hidden="true"></div>
+        <div class="fountain" aria-hidden="true"></div>
+      </section>
+    </main>
+
+    <template id="pigeon-template">
+      <button class="pigeon" type="button">
+        <span class="bubble" aria-live="polite"></span>
+        <img class="pigeon-image" alt="" />
+      </button>
+    </template>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
